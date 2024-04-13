@@ -3,13 +3,15 @@
 # Function to create file and parent directories
 mkfileP() {
     # https://stackoverflow.com/a/24666836/17786040
-    mkdir -p "$(dirname "$1")" || exit 1
-    touch "$1"
+    local filepath="$1"
+    mkdir -p "$(dirname $filepath)" || exit 1
+    touch $filepath
 }
 
 # Function to start a given number of VMs
 start_vms() {
     local num_vms=$1
+    local i # important to use local keyword, otherwise changes i value in caller
     for ((i=1; i<=$num_vms; i++))
     do
         bash manage_vms.sh clone $i
@@ -31,6 +33,7 @@ run_experiment() {
     local num_intervals="$2"
     local interval_duration="$3"
     local log_directory_path="$4"
+    local i
 
     for ((i=1; i<=$max_vms; i++))
     do
@@ -44,10 +47,8 @@ run_experiment() {
         fi
         mkfileP $log_file_path
 
-        echo "i=$i while start"
         start_vms $i
         bash monitor_ksm.sh $log_file_path $num_intervals $interval_duration
-        echo "i=$i while shutdown"
         shutdown_vms $i
     done
 }

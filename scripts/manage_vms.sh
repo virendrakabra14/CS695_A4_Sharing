@@ -1,6 +1,7 @@
 #!/bin/bash
 
 create_clones() {
+    local i
     for ((i=2; i<=$total_vm_count; i++))
     do
         clone_vm="${vm_prefix_name}${i}_${vm_suffix_name}"
@@ -15,6 +16,7 @@ create_clones() {
 }
 
 start_vms() {
+    local i
     for ((i=1; i<=$total_vm_count; i++))
     do
         vm_name="${vm_prefix_name}${i}_${vm_suffix_name}"
@@ -24,6 +26,7 @@ start_vms() {
 }
 
 shutdown_vms() {
+    local i
     for ((i=1; i<=$total_vm_count; i++))
     do
         vm_name="${vm_prefix_name}${i}_${vm_suffix_name}"
