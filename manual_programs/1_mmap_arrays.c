@@ -25,13 +25,13 @@ int main() {
     }
 
     // Advise the kernel that these memory regions are mergeable
-    if (madvise(array1, ARRAY_SIZE * sizeof(int), MADV_MERGEABLE) == -1 || 
+    if (madvise(array1, ARRAY_SIZE * sizeof(int), MADV_MERGEABLE) == -1 ||
         madvise(array2, ARRAY_SIZE * sizeof(int), MADV_MERGEABLE) == -1) {
         perror("Error advising kernel");
     }
 
     // Sleep to allow time for KSM to potentially merge identical pages
-    sleep(10);
+    getchar();
 
     /**
      * Now (after some time) we see
@@ -39,15 +39,36 @@ int main() {
      *  pages_sharing 977 (how many more sites are sharing them i.e. how much saved)
     */
 
+    /**
+     * cat /proc/<pid>/ksm_stat
+     * ksm_rmap_items 1954
+     * ksm_merging_pages 1954
+     * ksm_process_profit 7878528
+     *  https://elixir.bootlin.com/linux/v6.5/source/mm/ksm.c#L3092
+     *  computation:    ksm_saved_pages * sizeof(page) -
+                        ksm_rmap_items * sizeof(rmap_item)
+        On my system, sizeof(page)=4096, sizeof(rmap_item)=64
+     *
+     * From https://elixir.bootlin.com/linux/v6.5/source/mm/ksm.c#L2090,
+     * we can see that ksm_merging_pages is ksm_pages_sharing+ksm_pages_shared
+     * Hence process_profit quite different from general_profit
+    */
+
     array1[0] = -1;
     printf("%d\n", *array1);
 
-    sleep(60);
+    getchar();
 
     /**
      * Now we see
      *  pages_shared 977
      *  pages_sharing 976 (1 page modified above...)
+    */
+
+    /**
+     * ksm_rmap_items 1954
+     * ksm_merging_pages 1953
+     * ksm_process_profit 7874432
     */
 
     // Free allocated memory
