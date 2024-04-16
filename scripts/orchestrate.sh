@@ -36,6 +36,20 @@ update_ksm_parameters() {
     echo $sleep_millisecs > "/sys/kernel/mm/ksm/sleep_millisecs"
 }
 
+get_vm_pids() {
+    local max_vms="$1"
+    local -n pid_arr="$2"
+
+    pid_arr=()
+    local i
+
+    for ((i=1; i<=$max_vms; i++))
+    do
+        vm_name="${vm_prefix_name}${i}_${vm_suffix_name}"
+        pid_arr+=($(cat /var/run/libvirt/qemu/${vm_name}.pid))
+    done
+}
+
 # Main experiment function
 run_experiment() {
     local max_vms="$1"
@@ -50,7 +64,7 @@ run_experiment() {
     do
         echo "Running experiment with $i VMs"
 
-        log_file_path="${log_directory_path}/${i}.log"
+        local log_file_path="${log_directory_path}/${i}.log"
         if [ -e $log_file_path ]
         then
             echo "ERROR: $log_file_path exists"
@@ -60,8 +74,11 @@ run_experiment() {
 
         update_ksm_parameters $pages_to_scan $sleep_millisecs
 
+        local vm_pid_array
+        get_vm_pids $i vm_pid_array
+
         start_vms $i
-        bash monitor_ksm.sh $log_file_path $num_intervals $interval_duration
+        bash monitor_ksm.sh $log_file_path $num_intervals $interval_duration "${vm_pid_array[@]}"
         shutdown_vms $i
     done
 }
@@ -75,6 +92,10 @@ num_intervals=30
 interval_duration=60
 pages_to_scan=100
 sleep_millisecs=200
+
+# global variables
+vm_prefix_name="vm"
+vm_suffix_name="debian12"
 
 # Function to print usage directions
 usage() {
