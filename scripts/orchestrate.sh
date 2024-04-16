@@ -98,13 +98,13 @@ run_experiment() {
 
 # Unset mandatory arguments
 unset -v max_vms
-unset -v log_directory_path
 
 # Set default values for optional arguments
 num_intervals=30
 interval_duration=60
 pages_to_scan=100
 sleep_millisecs=200
+log_directory_path="../logs/logs_$(date '+%Y_%m_%d_%H_%M')"
 
 # global variables
 vm_prefix_name="vm"
@@ -112,7 +112,7 @@ vm_suffix_name="debian12"
 
 # Function to print usage directions
 usage() {
-    echo "Usage: $0 -m max_vms -l log_directory_path [-i num_intervals=$num_intervals] [-d interval_duration=$interval_duration] [-p pages_to_scan=$pages_to_scan] [-s sleep_millisecs=$sleep_millisecs]"
+    echo "Usage: $0 -m max_vms [-l log_directory_path] [-i num_intervals=$num_intervals] [-d interval_duration=$interval_duration] [-p pages_to_scan=$pages_to_scan] [-s sleep_millisecs=$sleep_millisecs]"
 }
 
 # Parsing command line options
