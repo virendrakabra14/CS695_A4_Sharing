@@ -132,10 +132,10 @@ done
 shift $((OPTIND -1))
 
 # Check if all required arguments are provided
-if [ -z $max_vms ] || [ -z $log_directory_path ]
+if [ -z $max_vms ]
 then
     usage >&2
-    echo 'Missing -m or -l' >&2
+    echo 'Missing -m' >&2
     exit 1
 fi
 
