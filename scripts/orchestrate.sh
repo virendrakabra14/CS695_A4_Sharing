@@ -36,6 +36,10 @@ update_ksm_parameters() {
     echo $sleep_millisecs > "/sys/kernel/mm/ksm/sleep_millisecs"
 }
 
+restore_ksm_param() {
+    echo "$1" > "/sys/kernel/mm/ksm/$2"
+}
+
 get_vm_pids() {
     local max_vms="$1"
     local -n pid_arr="$2"
@@ -60,6 +64,11 @@ run_experiment() {
     local sleep_millisecs="$6"
     local i
 
+    # run ksmd
+    echo 1 > "/sys/kernel/mm/ksm/run"
+    # update ksm system parameters for this experiment
+    update_ksm_parameters $pages_to_scan $sleep_millisecs
+
     for ((i=1; i<=$max_vms; i++))
     do
         echo "Running experiment with $i VMs"
@@ -72,13 +81,17 @@ run_experiment() {
         fi
         mkfileP $log_file_path
 
-        update_ksm_parameters $pages_to_scan $sleep_millisecs
+        # start vms (cloning happens here if required)
+        start_vms $i
 
+        # get vm pids
         local vm_pid_array
         get_vm_pids $i vm_pid_array
 
-        start_vms $i
+        # monitor ksm stats
         bash monitor_ksm.sh $log_file_path $num_intervals $interval_duration "${vm_pid_array[@]}"
+
+        # shutdown
         shutdown_vms $i
     done
 }
@@ -105,7 +118,7 @@ usage() {
 # Parsing command line options
 # leading colon: handle unknown args in code, and
 # m: means option m requires a value
-while getopts ":m:i:d:l:" opt; do
+while getopts ":m:i:d:l:p:s:" opt; do
     case $opt in
         m) max_vms="$OPTARG" ;;
         l) log_directory_path="$OPTARG" ;;
@@ -113,7 +126,7 @@ while getopts ":m:i:d:l:" opt; do
         d) interval_duration="$OPTARG" ;;
         p) pages_to_scan="$OPTARG" ;;
         s) sleep_millisecs="$OPTARG" ;;
-        \?) echo "Invalid option -$OPTARG" >&2 ;;
+        \?) echo "Invalid option -$OPTARG" >&2; exit 1 ;;
     esac
 done
 shift $((OPTIND -1))
@@ -129,3 +142,7 @@ fi
 # Run experiment with provided arguments
 shutdown_vms $max_vms
 run_experiment $max_vms $num_intervals $interval_duration $log_directory_path $pages_to_scan $sleep_millisecs
+
+# Restore changed ksm system parameters to default
+restore_ksm_param 100 "pages_to_scan"
+restore_ksm_param 200 "sleep_millisecs"
