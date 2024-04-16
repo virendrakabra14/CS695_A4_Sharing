@@ -27,12 +27,23 @@ shutdown_vms() {
     sleep 10
 }
 
+# Function to update system ksm parameters
+update_ksm_parameters() {
+    local pages_to_scan="$1"
+    local sleep_millisecs="$2"
+
+    echo $pages_to_scan > "/sys/kernel/mm/ksm/pages_to_scan"
+    echo $sleep_millisecs > "/sys/kernel/mm/ksm/sleep_millisecs"
+}
+
 # Main experiment function
 run_experiment() {
     local max_vms="$1"
     local num_intervals="$2"
     local interval_duration="$3"
     local log_directory_path="$4"
+    local pages_to_scan="$5"
+    local sleep_millisecs="$6"
     local i
 
     for ((i=1; i<=$max_vms; i++))
@@ -47,18 +58,53 @@ run_experiment() {
         fi
         mkfileP $log_file_path
 
+        update_ksm_parameters $pages_to_scan $sleep_millisecs
+
         start_vms $i
         bash monitor_ksm.sh $log_file_path $num_intervals $interval_duration
         shutdown_vms $i
     done
 }
 
+# Unset mandatory arguments
+unset -v max_vms
+unset -v log_directory_path
+
+# Set default values for optional arguments
+num_intervals=30
+interval_duration=60
+pages_to_scan=100
+sleep_millisecs=200
+
+# Function to print usage directions
+usage() {
+    echo "Usage: $0 -m max_vms -l log_directory_path [-i num_intervals=$num_intervals] [-d interval_duration=$interval_duration] [-p pages_to_scan=$pages_to_scan] [-s sleep_millisecs=$sleep_millisecs]"
+}
+
+# Parsing command line options
+# leading colon: handle unknown args in code, and
+# m: means option m requires a value
+while getopts ":m:i:d:l:" opt; do
+    case $opt in
+        m) max_vms="$OPTARG" ;;
+        l) log_directory_path="$OPTARG" ;;
+        i) num_intervals="$OPTARG" ;;
+        d) interval_duration="$OPTARG" ;;
+        p) pages_to_scan="$OPTARG" ;;
+        s) sleep_millisecs="$OPTARG" ;;
+        \?) echo "Invalid option -$OPTARG" >&2 ;;
+    esac
+done
+shift $((OPTIND -1))
+
 # Check if all required arguments are provided
-if [ $# -ne 4 ]; then
-    echo "Usage: $0 <max_vms> <num_intervals> <interval_duration> <log_directory_path>"
+if [ -z $max_vms ] || [ -z $log_directory_path ]
+then
+    usage >&2
+    echo 'Missing -m or -l' >&2
     exit 1
 fi
 
 # Run experiment with provided arguments
-shutdown_vms "$1"
-run_experiment "$@"
+shutdown_vms $max_vms
+run_experiment $max_vms $num_intervals $interval_duration $log_directory_path $pages_to_scan $sleep_millisecs
