@@ -27,6 +27,13 @@ shutdown_vms() {
     sleep 10
 }
 
+# Function to execute command in all VMs
+run_vm_command() {
+    local num_vms=$1
+    local command="$2"
+    bash manage_vms.sh exec $num_vms "$command"
+}
+
 # Function to update system ksm parameters
 update_ksm_parameters() {
     local pages_to_scan="$1"
@@ -62,6 +69,8 @@ run_experiment() {
     local log_directory_path="$4"
     local pages_to_scan="$5"
     local sleep_millisecs="$6"
+    local vm_command="$7"
+    echo "vm_command=$vm_command"
     local i
 
     # run ksmd
@@ -84,6 +93,12 @@ run_experiment() {
         # start vms (cloning happens here if required)
         start_vms $i
 
+        # execute command in vms
+        if [ -n "$vm_command" ]
+        then
+            run_vm_command $i "$vm_command"
+        fi
+
         # get vm pids
         local vm_pid_array
         get_vm_pids $i vm_pid_array
@@ -105,6 +120,7 @@ interval_duration=60
 pages_to_scan=100
 sleep_millisecs=200
 log_directory_path="../logs/logs_$(date '+%Y_%m_%d_%H_%M')"
+vm_command=""
 
 # global variables
 vm_prefix_name="vm"
@@ -112,13 +128,13 @@ vm_suffix_name="debian12"
 
 # Function to print usage directions
 usage() {
-    echo "Usage: $0 -m max_vms [-l log_directory_path] [-i num_intervals=$num_intervals] [-d interval_duration=$interval_duration] [-p pages_to_scan=$pages_to_scan] [-s sleep_millisecs=$sleep_millisecs]"
+    echo "Usage: $0 -m max_vms [-l log_directory_path] [-i num_intervals=$num_intervals] [-d interval_duration=$interval_duration] [-p pages_to_scan=$pages_to_scan] [-s sleep_millisecs=$sleep_millisecs] [-c vm_command]"
 }
 
 # Parsing command line options
 # leading colon: handle unknown args in code, and
 # m: means option m requires a value
-while getopts ":m:i:d:l:p:s:" opt; do
+while getopts ":m:i:d:l:p:s:c:" opt; do
     case $opt in
         m) max_vms="$OPTARG" ;;
         l) log_directory_path="$OPTARG" ;;
@@ -126,6 +142,7 @@ while getopts ":m:i:d:l:p:s:" opt; do
         d) interval_duration="$OPTARG" ;;
         p) pages_to_scan="$OPTARG" ;;
         s) sleep_millisecs="$OPTARG" ;;
+        c) vm_command="$OPTARG" ;;
         \?) echo "Invalid option -$OPTARG" >&2; exit 1 ;;
     esac
 done
@@ -141,7 +158,7 @@ fi
 
 # Run experiment with provided arguments
 shutdown_vms $max_vms
-run_experiment $max_vms $num_intervals $interval_duration $log_directory_path $pages_to_scan $sleep_millisecs
+run_experiment $max_vms $num_intervals $interval_duration $log_directory_path $pages_to_scan $sleep_millisecs "$vm_command"
 
 # Restore changed ksm system parameters to default
 restore_ksm_param 100 "pages_to_scan"
