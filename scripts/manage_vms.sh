@@ -42,8 +42,7 @@ get_ip() {
     local vm_ip_address=""
     while [ -z $vm_ip_address ]
     do
-        vm_mac_address=$(virsh -q domiflist ${vm_name} | awk '{ print $5 }')
-        vm_ip_address=$(virsh -q net-dhcp-leases default --mac ${vm_mac_address} | awk '{ print $5 }' | awk -F'/' '{ print $1 }')
+        vm_ip_address=$(virsh domifaddr --source lease ${vm_name} | awk 'NR == 3 { print $4 }' | awk -F'/' '{ print $1 }')
     done
     echo $vm_ip_address # captured by caller
 }
@@ -51,7 +50,6 @@ get_ip() {
 get_vm_ips() {
     local -n ip_arr="$1"
     local i
-
     ip_arr=()
     for ((i=1; i<=$total_vm_count; i++))
     do
