@@ -1,0 +1,204 @@
+num_intervals=10
+interval_duration=60
+command_executed_in_vms=''
+vm_pid_array=51850 51904
+Interval 1: average_cpu_usage=4.99
+[BEGIN] Logging ksm system parameters
+full_scans=3160
+general_profit=386716544
+max_page_sharing=256
+merge_across_nodes=1
+pages_shared=48036
+pages_sharing=97480
+pages_to_scan=1000
+pages_unshared=50392
+pages_volatile=297
+run=1
+sleep_millisecs=20
+stable_node_chains=4
+stable_node_chains_prune_millisecs=2000
+stable_node_dups=178
+use_zero_pages=0
+[END] Logging ksm system parameters
+/proc/51850/ksm_stat=ksm_rmap_items 93900 ksm_merging_pages 70877 ksm_process_profit 284302592
+/proc/51904/ksm_stat=ksm_rmap_items 102310 ksm_merging_pages 74644 ksm_process_profit 299193984
+Interval 2: average_cpu_usage=4.72
+[BEGIN] Logging ksm system parameters
+full_scans=3172
+general_profit=386683776
+max_page_sharing=256
+merge_across_nodes=1
+pages_shared=48034
+pages_sharing=97471
+pages_to_scan=1000
+pages_unshared=50324
+pages_volatile=381
+run=1
+sleep_millisecs=20
+stable_node_chains=4
+stable_node_chains_prune_millisecs=2000
+stable_node_dups=178
+use_zero_pages=0
+[END] Logging ksm system parameters
+/proc/51850/ksm_stat=ksm_rmap_items 93900 ksm_merging_pages 70860 ksm_process_profit 284232960
+/proc/51904/ksm_stat=ksm_rmap_items 102310 ksm_merging_pages 74645 ksm_process_profit 299198080
+Interval 3: average_cpu_usage=4.55
+[BEGIN] Logging ksm system parameters
+full_scans=3184
+general_profit=386728832
+max_page_sharing=256
+merge_across_nodes=1
+pages_shared=48042
+pages_sharing=97482
+pages_to_scan=1000
+pages_unshared=50366
+pages_volatile=320
+run=1
+sleep_millisecs=20
+stable_node_chains=4
+stable_node_chains_prune_millisecs=2000
+stable_node_dups=178
+use_zero_pages=0
+[END] Logging ksm system parameters
+/proc/51850/ksm_stat=ksm_rmap_items 93900 ksm_merging_pages 70869 ksm_process_profit 284269824
+/proc/51904/ksm_stat=ksm_rmap_items 102310 ksm_merging_pages 74655 ksm_process_profit 299239040
+Interval 4: average_cpu_usage=2.72
+[BEGIN] Logging ksm system parameters
+full_scans=3195
+general_profit=386827136
+max_page_sharing=256
+merge_across_nodes=1
+pages_shared=48046
+pages_sharing=97506
+pages_to_scan=1000
+pages_unshared=50298
+pages_volatile=360
+run=1
+sleep_millisecs=20
+stable_node_chains=4
+stable_node_chains_prune_millisecs=2000
+stable_node_dups=178
+use_zero_pages=0
+[END] Logging ksm system parameters
+/proc/51850/ksm_stat=ksm_rmap_items 93900 ksm_merging_pages 70893 ksm_process_profit 284368128
+/proc/51904/ksm_stat=ksm_rmap_items 102310 ksm_merging_pages 74659 ksm_process_profit 299255424
+Interval 5: average_cpu_usage=3.54
+[BEGIN] Logging ksm system parameters
+full_scans=3207
+general_profit=386769792
+max_page_sharing=256
+merge_across_nodes=1
+pages_shared=48044
+pages_sharing=97490
+pages_to_scan=1000
+pages_unshared=50202
+pages_volatile=474
+run=1
+sleep_millisecs=20
+stable_node_chains=4
+stable_node_chains_prune_millisecs=2000
+stable_node_dups=178
+use_zero_pages=0
+[END] Logging ksm system parameters
+/proc/51850/ksm_stat=ksm_rmap_items 93900 ksm_merging_pages 70867 ksm_process_profit 284261632
+/proc/51904/ksm_stat=ksm_rmap_items 102310 ksm_merging_pages 74667 ksm_process_profit 299288192
+Interval 6: average_cpu_usage=4.29
+[BEGIN] Logging ksm system parameters
+full_scans=3219
+general_profit=386732928
+max_page_sharing=256
+merge_across_nodes=1
+pages_shared=48043
+pages_sharing=97483
+pages_to_scan=1000
+pages_unshared=50310
+pages_volatile=374
+run=1
+sleep_millisecs=20
+stable_node_chains=4
+stable_node_chains_prune_millisecs=2000
+stable_node_dups=178
+use_zero_pages=0
+[END] Logging ksm system parameters
+/proc/51850/ksm_stat=ksm_rmap_items 93900 ksm_merging_pages 70883 ksm_process_profit 284327168
+/proc/51904/ksm_stat=ksm_rmap_items 102310 ksm_merging_pages 74643 ksm_process_profit 299189888
+Interval 7: average_cpu_usage=3.26
+[BEGIN] Logging ksm system parameters
+full_scans=3230
+general_profit=386782080
+max_page_sharing=256
+merge_across_nodes=1
+pages_shared=48048
+pages_sharing=97495
+pages_to_scan=1000
+pages_unshared=50373
+pages_volatile=294
+run=1
+sleep_millisecs=20
+stable_node_chains=4
+stable_node_chains_prune_millisecs=2000
+stable_node_dups=178
+use_zero_pages=0
+[END] Logging ksm system parameters
+/proc/51850/ksm_stat=ksm_rmap_items 93900 ksm_merging_pages 70886 ksm_process_profit 284339456
+/proc/51904/ksm_stat=ksm_rmap_items 102310 ksm_merging_pages 74657 ksm_process_profit 299247232
+Interval 8: average_cpu_usage=3.64
+[BEGIN] Logging ksm system parameters
+full_scans=3242
+general_profit=386786176
+max_page_sharing=256
+merge_across_nodes=1
+pages_shared=48057
+pages_sharing=97493
+pages_to_scan=1000
+pages_unshared=50294
+pages_volatile=369
+run=1
+sleep_millisecs=20
+stable_node_chains=4
+stable_node_chains_prune_millisecs=2000
+stable_node_dups=178
+use_zero_pages=0
+[END] Logging ksm system parameters
+/proc/51850/ksm_stat=ksm_rmap_items 93900 ksm_merging_pages 70879 ksm_process_profit 284310784
+/proc/51904/ksm_stat=ksm_rmap_items 102310 ksm_merging_pages 74668 ksm_process_profit 299292288
+Interval 9: average_cpu_usage=4.51
+[BEGIN] Logging ksm system parameters
+full_scans=3253
+general_profit=386737024
+max_page_sharing=256
+merge_across_nodes=1
+pages_shared=48048
+pages_sharing=97484
+pages_to_scan=1000
+pages_unshared=50368
+pages_volatile=310
+run=1
+sleep_millisecs=20
+stable_node_chains=4
+stable_node_chains_prune_millisecs=2000
+stable_node_dups=178
+use_zero_pages=0
+[END] Logging ksm system parameters
+/proc/51850/ksm_stat=ksm_rmap_items 93900 ksm_merging_pages 70889 ksm_process_profit 284351744
+/proc/51904/ksm_stat=ksm_rmap_items 102310 ksm_merging_pages 74643 ksm_process_profit 299189888
+Interval 10: average_cpu_usage=4.14
+[BEGIN] Logging ksm system parameters
+full_scans=3265
+general_profit=387955200
+max_page_sharing=256
+merge_across_nodes=1
+pages_shared=48054
+pages_sharing=97786
+pages_to_scan=1000
+pages_unshared=50294
+pages_volatile=370
+run=1
+sleep_millisecs=20
+stable_node_chains=4
+stable_node_chains_prune_millisecs=2000
+stable_node_dups=179
+use_zero_pages=0
+[END] Logging ksm system parameters
+/proc/51850/ksm_stat=ksm_rmap_items 93900 ksm_merging_pages 70879 ksm_process_profit 284310784
+/proc/51904/ksm_stat=ksm_rmap_items 102604 ksm_merging_pages 74961 ksm_process_profit 300473600
