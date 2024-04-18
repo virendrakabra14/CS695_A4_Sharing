@@ -5,9 +5,11 @@ truncate -s0 $log_file # empty the log file
 
 num_intervals="$2"
 interval_duration="$3"
-vm_pid_array=("${@:4}")
+command_executed_in_vms="$4"
+vm_pid_array=("${@:5}")
 echo "num_intervals=$num_intervals" >> $log_file
 echo "interval_duration=$interval_duration" >> $log_file
+echo "command_executed_in_vms='$command_executed_in_vms'" >> $log_file
 echo "vm_pid_array=${vm_pid_array[*]}" >> $log_file
 
 log_ksm_sys_params() {

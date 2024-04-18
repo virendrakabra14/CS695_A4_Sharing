@@ -103,7 +103,7 @@ run_experiment() {
         get_vm_pids $i vm_pid_array
 
         # monitor ksm stats
-        bash monitor_ksm.sh $log_file_path $num_intervals $interval_duration "${vm_pid_array[@]}"
+        bash monitor_ksm.sh $log_file_path $num_intervals $interval_duration "$vm_command" "${vm_pid_array[@]}"
 
         # shutdown
         shutdown_vms $i
