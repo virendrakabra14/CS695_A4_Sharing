@@ -62,25 +62,25 @@ get_vm_ips() {
 
 execute_command_in_vms() {
     local command="$2"
-    echo "$command"
     local vm_ip_arr
     local password_file_path="../.password" # hard-coded
     local vm_username="vmuser"
 
     # get vm ips
     get_vm_ips vm_ip_arr
-    echo "${vm_ip_arr[@]}"
 
     local i
 
     for ((i=1; i<=$total_vm_count; i++))
     do
         local vm_name="${vm_prefix_name}${i}_${vm_suffix_name}"
-        echo "executing '$command' on ${vm_name}"
         local zero_based_idx=$(($i-1))
+        local vm_ip="${vm_ip_arr[$zero_based_idx]}"
+        echo "executing '$command' on ${vm_name}: ${vm_username}@${vm_ip}"
 
         # ssh and execute command in background
-        sshpass -f "$password_file_path" ssh "${vm_username}@${vm_ip_arr[$zero_based_idx]}" "$command" #&
+        # https://askubuntu.com/questions/123072/ssh-automatically-accept-keys
+        sshpass -f "$password_file_path" ssh -oStrictHostKeyChecking=no "${vm_username}@${vm_ip}" "$command" &
     done
 }
 
@@ -92,11 +92,6 @@ vm_suffix_name="debian12"
 base_vm=${vm_prefix_name}1_${vm_suffix_name}
 
 total_vm_count="$2"
-
-for ((i=1; i<=$#; i++))
-do
-    echo "Argument $i: ${!i}"
-done
 
 case "$1" in
     clone)

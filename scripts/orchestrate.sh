@@ -70,7 +70,6 @@ run_experiment() {
     local pages_to_scan="$5"
     local sleep_millisecs="$6"
     local vm_command="$7"
-    echo "vm_command=$vm_command"
     local i
 
     # run ksmd
