@@ -64,7 +64,7 @@ execute_command_in_vms() {
     local command="$2"
     local vm_ip_arr
     local password_file_path="../.password" # hard-coded
-    local vm_username="vmuser"
+    local vm_username="root" # hard-coded
 
     # get vm ips
     get_vm_ips vm_ip_arr
