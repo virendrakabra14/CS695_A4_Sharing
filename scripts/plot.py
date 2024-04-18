@@ -4,11 +4,20 @@ import pathlib
 
 # Define a function to parse the file and extract metrics for each interval
 def parse_metrics(filename):
-    interval_cpu_usage = []
-    interval_pages_shared = []
-    interval_pages_sharing = []
-    interval_general_profit = []
-    interval_numbers = []
+    ksm_metric_names = [
+        "full_scans",
+        "general_profit",
+        "pages_shared",
+        "pages_sharing",
+        "pages_unshared",
+        "pages_volatile",
+    ]
+
+    interval_metrics = {}
+    interval_metrics["interval_numbers"] = []
+    interval_metrics["average_cpu_usage"] = []
+    for e in ksm_metric_names:
+        interval_metrics[e] = []
 
     # Open the file
     with open(filename, 'r') as file:
@@ -18,35 +27,23 @@ def parse_metrics(filename):
             line = line.strip()
 
             # Check if the line starts with 'Interval'
-            if line.startswith('Interval'):
+            if line.startswith('Interval '):
                 # If yes, extract the interval number
                 parts = line.split(':')
                 interval_number = int(parts[0].split()[1])
-                interval_numbers.append(interval_number)
+                interval_metrics["interval_numbers"].append(interval_number)
 
-                # Extract the metrics
-                cpu_usage = float(parts[1].split('=')[1])
-                interval_cpu_usage.append(cpu_usage)
+                # Extract cpu metric
+                average_cpu_usage = float(parts[1].split('=')[1])
+                interval_metrics["average_cpu_usage"].append(average_cpu_usage)
 
-                # Continue reading the next lines for other metrics
-                next_lines = file.readline().strip()
-                while next_lines:
-                    parts = next_lines.split(':')
-                    interval_number = int(parts[0].split()[1])
-                    if interval_number != interval_numbers[-1] :
-                        interval_numbers.append(interval_number)
-                    metric = parts[1].strip().split('=')
-                    if metric[0] == 'average_cpu_usage':
-                        interval_cpu_usage.append(float(metric[1]))
-                    if metric[0] == 'pages_shared':
-                        interval_pages_shared.append(float(metric[1]))
-                    elif metric[0] == 'pages_sharing':
-                        interval_pages_sharing.append(float(metric[1]))
-                    elif metric[0] == 'general_profit':
-                        interval_general_profit.append(float(metric[1]))
-                    next_lines = file.readline().strip()
+            # KSM metrics
+            elif len(line.split('=')) == 2:
+                metric = line.strip().split('=')
+                if metric[0] in interval_metrics:
+                    interval_metrics[metric[0]].append(float(metric[1]))
 
-    return interval_numbers, interval_cpu_usage, interval_pages_shared, interval_pages_sharing, interval_general_profit
+    return interval_metrics
 
 if __name__ == "__main__":
 
@@ -62,95 +59,54 @@ if __name__ == "__main__":
 
     pathlib.Path(plots_folder).mkdir(exist_ok=False, parents=True) # raise error if already present
 
+    interval_numbers_key = "interval_numbers"
+
     if not MAKE_PLOTS_AGAINST_VMS:
 
         file1 = f'{metrics_folder}/{metrics_vs_interval_file_number}.log'
-        interval_numbers, cpu_usage, pages_shared, pages_sharing, general_profit = parse_metrics(file1)
+        interval_metrics = parse_metrics(file1)
 
         # Plot each metric against interval
-        plt.ioff()
-        plt.plot(interval_numbers, cpu_usage, marker='o', label='CPU Usage')
-        plt.xlabel('Interval')
-        plt.ylabel('Average CPU Usage')
-        plt.title('CPU Usage vs Interval')
-        plt.grid(True)
-        plt.savefig(f"{plots_folder}/cpu_usage_vs_interval.png")
-        plt.close()
+        for k, v in interval_metrics.items():
+            if k == interval_numbers_key:
+                continue
 
-        plt.ioff()
-        plt.plot(interval_numbers, pages_shared, marker='o', label='Pages Shared')
-        plt.xlabel('Interval')
-        plt.ylabel('Pages Shared')
-        plt.title('Pages Shared vs Interval')
-        plt.grid(True)
-        plt.savefig(f"{plots_folder}/pages_shared_vs_interval.png")
-        plt.close()
-
-        plt.plot(interval_numbers, pages_sharing, marker='o', label='Pages Sharing')
-        plt.xlabel('Interval')
-        plt.ylabel('Pages Sharing')
-        plt.title('Pages Sharing vs Interval')
-        plt.grid(True)
-        plt.savefig(f"{plots_folder}/pages_sharing_vs_interval.png")
-        plt.close()
-
-        plt.plot(interval_numbers, general_profit, marker='o', label='General Profit')
-        plt.xlabel('Interval')
-        plt.ylabel('General Profit')
-        plt.title('General Profit vs Interval')
-        plt.grid(True)
-        plt.savefig(f"{plots_folder}/general_profit_vs_interval.png")
-        plt.close()
+            plt.ioff()
+            plt.plot(interval_metrics[interval_numbers_key], v, marker='o', label=k)
+            plt.xlabel(interval_numbers_key)
+            plt.ylabel(k)
+            title = f'{k}-vs-{interval_numbers_key}'
+            plt.title(title)
+            plt.grid(True)
+            plt.legend()
+            plt.savefig(f"{plots_folder}/{title}.png")
+            plt.close()
 
     else:
 
         num_vms = NUM_VMS
-        last_cpu = []
-        last_shared = []
-        last_gp = []
-        last_sharing = []
+        last_interval_metrics = {}
         vms = range(1,num_vms+1)
 
         for vm in vms :
             file = f'{metrics_folder}/{vm}.log'
-            interval_numbers, cpu_usage, pages_shared, pages_sharing, general_profit = parse_metrics(file)
-            last_cpu.append(cpu_usage[-1])
-            last_shared.append(pages_shared[-1])
-            last_gp.append(general_profit[-1])
-            last_sharing.append(pages_sharing[-1])
+            interval_metrics = parse_metrics(file)
+            for k, v in interval_metrics.items():
+                if k == interval_numbers_key:
+                    continue
+                if k not in last_interval_metrics:
+                    last_interval_metrics[k] = []
+                last_interval_metrics[k].append(v[-1])
 
         vms = range(1,num_vms+1)
         # Plot each metric against vm
-        plt.ioff()
-        plt.plot(vms, last_cpu, marker='o', label='CPU Usage')
-        plt.xlabel('VM')
-        plt.ylabel('Average CPU Usage')
-        plt.title('CPU Usage vs VM')
-        plt.grid(True)
-        plt.savefig(f"{plots_folder}/cpu_usage_vs_vm.png")
-        plt.close()
-
-        plt.ioff()
-        plt.plot(vms, last_shared, marker='o', label='Pages Shared')
-        plt.xlabel('VM')
-        plt.ylabel('Pages Shared')
-        plt.title('Pages Shared vs VM')
-        plt.grid(True)
-        plt.savefig(f"{plots_folder}/pages_shared_vs_vm.png")
-        plt.close()
-
-        plt.plot(vms, last_sharing, marker='o', label='Pages Sharing')
-        plt.xlabel('VM')
-        plt.ylabel('Pages Sharing')
-        plt.title('Pages Sharing vs VM')
-        plt.grid(True)
-        plt.savefig(f"{plots_folder}/pages_sharing_vs_vm.png")
-        plt.close()
-
-        plt.plot(vms, last_gp, marker='o', label='General Profit')
-        plt.xlabel('VM')
-        plt.ylabel('General Profit')
-        plt.title('General Profit vs VM')
-        plt.grid(True)
-        plt.savefig(f"{plots_folder}/general_profit_vs_vm.png")
-        plt.close()
+        for k, v in last_interval_metrics.items():
+            plt.ioff()
+            plt.plot(vms, v, marker='o', label=k)
+            plt.xlabel('VM')
+            plt.ylabel(k)
+            title = f'{k}-vs-vms'
+            plt.title(title)
+            plt.grid(True)
+            plt.savefig(f"{plots_folder}/{title}.png")
+            plt.close()

@@ -37,12 +37,7 @@ get_ksm_proc_stat() {
     echo $stat
 }
 
-# at the start, log all ksm system parameters
-log_ksm_sys_params
-
-# then log once per interval
-
-ksm_sys_params=("pages_shared" "pages_sharing" "general_profit")
+# log once per interval
 
 for ((i=1; i<=$num_intervals; i++))
 do
@@ -51,17 +46,13 @@ do
     average_cpu_usage=$(mpstat $interval_duration 1 | grep -A 5 '%idle' | tail -n 1 | awk -F ' ' '{print 100 -  $ 12}'a)
     echo "Interval $i: average_cpu_usage=$average_cpu_usage" >> $log_file
 
-    # Log ksm system metrics
-    for param in "${ksm_sys_params[@]}"
-    do
-        stat=$(get_ksm_sys_stat $param)
-        echo "Interval $i: $param=$stat" >> $log_file
-    done
+    # Log all ksm system metrics
+    log_ksm_sys_params
 
     # Log per vm ksm metrics
     for vm_pid in "${vm_pid_array[@]}"
     do
         stat=$(get_ksm_proc_stat "$vm_pid")
-        echo "Interval $i: /proc/$vm_pid/ksm_stat=$stat" >> $log_file
+        echo "/proc/$vm_pid/ksm_stat=$stat" >> $log_file
     done
 done
