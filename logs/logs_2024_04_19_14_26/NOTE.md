@@ -1,0 +1,1 @@
+sudo bash orchestrate.sh -m 3 -i 30 -d 60 -p 1000 -s 20
