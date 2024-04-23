@@ -32,11 +32,32 @@ void pauseByCommand(char c) {
     }
 }
 
-int main() {
-    char pauseCommand = 's';
+void modifyByCommand(char c, int* array1, int* array2) {
+    int i;
+    switch (c)
+    {
+        case 's': // single value to -1
+            array1[0] = -1;
+            break;
+        case 'h': // half of all values to -1
+            for(i = 0; i < ARRAY_SIZE/2; i++) {
+                array1[i] = -1;
+            }
+            break;
+        case 'm': // half of all values, all distinct
+        default:
+            for(i = 0; i < ARRAY_SIZE/2; i++) {
+                array1[i] = -i;
+            }
+            break;
+    }
+}
 
+int main() {
     printf("pid: %d\n", getpid()); // useful for /proc/<pid>/ksm_stat
-    pauseByCommand(pauseCommand);
+    pauseByCommand('g');
+
+    char pauseCommand = 's';
 
     int *array1; defineMergeableArray(&array1);
     pauseByCommand(pauseCommand);
@@ -65,18 +86,18 @@ int main() {
      * Hence process_profit quite different from general_profit
     */
 
-    array1[0] = -1;
-    printf("%d\n", *array1);
+    modifyByCommand('m', array1, array2);
 
     pauseByCommand(pauseCommand);
 
     /**
-     * Now we see
+     * Below is when modification is just: `array1[0] = -1`
+     * i.e. case 's'
+     *
+     * Then we see
      *  pages_shared 977
      *  pages_sharing 976 (1 page modified above...)
-    */
-
-    /**
+     *
      * ksm_rmap_items 1954
      * ksm_merging_pages 1953
      * ksm_process_profit 7874432

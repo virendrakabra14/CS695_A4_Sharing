@@ -1,3 +1,26 @@
+# Running experiments
+
+## With manual programs
+```bash
+cd manual_programs
+gcc mmap_arrays.c
+./a.out # note the printed pid
+```
+
+In a separate terminal
+```bash
+# execute from inside manual_programs directory
+bash ../scripts/monitor_ksm.sh <log-filename>.log 35 1 "" "<pid from above>"
+# e.g. bash ../scripts/monitor_ksm.sh tmp.log 35 1 "" "11111"
+```
+
+To plot
+```bash
+# again, execute from inside manual_programs directory
+python3 ../scripts/plot.py "." "<log-filename>" "<plot-dirname>" "0" "0"
+# e.g. python3 ../scripts/plot.py "." "tmp" "tmp" "0" "0"
+```
+
 # Requirements
 
 - `sysstat` package for CPU monitoring
