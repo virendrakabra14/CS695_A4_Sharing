@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import sys
 import pathlib
+import numpy as np
 
 # Define a function to parse the file and extract metrics for each interval
 def parse_metrics(filename):
@@ -110,3 +111,38 @@ if __name__ == "__main__":
             plt.grid(True)
             plt.savefig(f"{plots_folder}/{title}.png")
             plt.close()
+
+        reclaimed = np.array(last_interval_metrics["pages_sharing"])*4/1024
+        pages_shared = np.array(last_interval_metrics["pages_shared"])*4/1024
+        shared = reclaimed + pages_shared
+        vms = np.array(vms)
+        total_mem = vms*512
+        plt.ioff()
+        plt.plot(vms, total_mem, marker='s', label='VM Memory')
+        plt.plot(vms, reclaimed, marker='^', label='Reclaimed')
+        plt.plot(vms, shared, marker='o', label='Shared')
+        plt.xlabel('Number of VMs')
+        plt.ylabel('Memory (MB)')
+        title = 'memory-vs-vms'
+        plt.title(title)
+        plt.grid(True)
+        plt.legend()
+        plt.savefig(f"{plots_folder}/{title}.png")
+        plt.close()
+        
+        shared = shared*100/total_mem
+        reclaimed = reclaimed*100/total_mem
+        diff = shared - reclaimed
+        plt.ioff()
+        plt.plot(vms, diff, marker='D', label='Shared - Reclaimed')
+        plt.plot(vms, reclaimed, marker='^', label='Reclaimed')
+        plt.plot(vms, shared, marker='o', label='Shared')
+        plt.xlabel('Number of VMs')
+        plt.ylabel('% VM Memory')
+        title = 'percent-vs-vms'
+        #plt.title(title)
+        plt.grid(True)
+        plt.legend()
+        plt.savefig(f"{plots_folder}/{title}.png")
+        plt.close()
+        
