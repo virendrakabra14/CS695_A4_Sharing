@@ -6,32 +6,43 @@
 
 #define ARRAY_SIZE 1000000
 
-int main() {
-    printf("pid: %d\n", getpid()); // useful for /proc/<pid>/ksm_stat
-
-    // Allocate memory using mmap for two identical arrays
-    int *array1 = mmap(NULL, ARRAY_SIZE * sizeof(int), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
-    int *array2 = mmap(NULL, ARRAY_SIZE * sizeof(int), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
-
-    if (array1 == MAP_FAILED || array2 == MAP_FAILED) {
+void defineMergeableArray(int** ptr) {
+    *ptr = mmap(NULL, ARRAY_SIZE * sizeof(int), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+    if (*ptr == MAP_FAILED) {
         perror("Memory allocation failed");
         exit(EXIT_FAILURE);
     }
-
-    // Initialize both arrays with the same values
     for (int i = 0; i < ARRAY_SIZE; i++) {
-        array1[i] = i;
-        array2[i] = i;
+        (*ptr)[i] = i;
     }
-
-    // Advise the kernel that these memory regions are mergeable
-    if (madvise(array1, ARRAY_SIZE * sizeof(int), MADV_MERGEABLE) == -1 ||
-        madvise(array2, ARRAY_SIZE * sizeof(int), MADV_MERGEABLE) == -1) {
+    if (madvise(*ptr, ARRAY_SIZE * sizeof(int), MADV_MERGEABLE) == -1) {
         perror("Error advising kernel");
     }
+}
 
-    // Sleep to allow time for KSM to potentially merge identical pages
-    getchar();
+void pauseByCommand(char c) {
+    switch(c) {
+        case 's':
+            sleep(10);
+            break;
+        case 'g':
+        default:
+            getchar();
+            break;
+    }
+}
+
+int main() {
+    char pauseCommand = 's';
+
+    printf("pid: %d\n", getpid()); // useful for /proc/<pid>/ksm_stat
+    pauseByCommand(pauseCommand);
+
+    int *array1; defineMergeableArray(&array1);
+    pauseByCommand(pauseCommand);
+
+    int *array2; defineMergeableArray(&array2);
+    pauseByCommand(pauseCommand);
 
     /**
      * Now (after some time) we see
@@ -57,7 +68,7 @@ int main() {
     array1[0] = -1;
     printf("%d\n", *array1);
 
-    getchar();
+    pauseByCommand(pauseCommand);
 
     /**
      * Now we see
