@@ -58,6 +58,23 @@ apt install sshpass
     apt install stress-ng
     ```
 
+## Experiments with VMs 
+
+```bash
+cd scripts 
+# Arguments within [] are optional
+sudo bash orchestrate.sh -m <max_vms> [-l <log_directory_path>] [-i <num_intervals>] [-d <interval_duration>] [-p <pages_to_scan>] [-s <sleep_millisecs>] [-c <vm_command>]
+```
+
+This creates folder at <log_directory_path> and adds the logs  
+
+To plot 
+```bash
+chmod 777 <log_directory_path> 
+#Execute within scripts directory
+bash make_plots.sh <number of vms> <log directory path> 
+```
+
 ## Running workloads
 
 ### stress-ng
