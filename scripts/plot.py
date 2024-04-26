@@ -2,6 +2,13 @@ import matplotlib.pyplot as plt
 import sys
 import pathlib
 import numpy as np
+import os
+
+def savefig(path):
+    if pathlib.Path(path).is_file():
+        print(f"WARNING: {path} already present. Skipping...")
+        return
+    plt.savefig(path)
 
 # Define a function to parse the file and extract metrics for each interval
 def parse_metrics(filename):
@@ -13,12 +20,25 @@ def parse_metrics(filename):
         "pages_unshared",
         "pages_volatile",
     ]
+    ksm_proc_metric_names = [
+        "ksm_rmap_items",
+        "ksm_merging_pages",
+        "ksm_process_profit"
+    ]
+
+    vm_proc_pids = []
+    vm_proc_prefixes = []
 
     interval_metrics = {}
     interval_metrics["interval_numbers"] = []
     interval_metrics["average_cpu_usage"] = []
     for e in ksm_metric_names:
         interval_metrics[e] = []
+
+    interval_proc_metrics = {}
+    interval_proc_metrics["vm_proc_pids"] = vm_proc_pids
+    for e in ksm_proc_metric_names:
+        interval_proc_metrics[e] = {}
 
     # Open the file
     with open(filename, 'r') as file:
@@ -43,8 +63,25 @@ def parse_metrics(filename):
                 metric = line.strip().split('=')
                 if metric[0] in interval_metrics:
                     interval_metrics[metric[0]].append(float(metric[1]))
+                elif metric[0] == "vm_pid_array":
+                    vm_proc_pids = metric[1].split(' ')
+                    interval_proc_metrics["vm_proc_pids"] = vm_proc_pids
+                    vm_proc_prefixes = [f"/proc/{pid}/ksm_stat" for pid in vm_proc_pids]
+                    for pid in vm_proc_pids:
+                        for e in ksm_proc_metric_names:
+                            interval_proc_metrics[e][pid] = []
+                elif metric[0] in vm_proc_prefixes:
+                    pid = metric[0].split('/')[2]
+                    proc_metrics = metric[1].split(' ')
+                    idx = 0
+                    while idx < len(proc_metrics):
+                        assert proc_metrics[idx] in ksm_proc_metric_names
+                        interval_proc_metrics[proc_metrics[idx]][pid].append(
+                            float(proc_metrics[idx+1])
+                        )
+                        idx += 2
 
-    return interval_metrics
+    return interval_metrics, interval_proc_metrics
 
 if __name__ == "__main__":
 
@@ -58,14 +95,15 @@ if __name__ == "__main__":
     MAKE_PLOTS_AGAINST_VMS = int(sys.argv[4]) # this is only required True once for each experiment
     NUM_VMS = int(sys.argv[5])
 
-    pathlib.Path(plots_folder).mkdir(exist_ok=False, parents=True) # raise error if already present
+    pathlib.Path(plots_folder).mkdir(exist_ok=True, parents=True)
 
     interval_numbers_key = "interval_numbers"
+    vm_proc_pids_key = "vm_proc_pids"
 
     if not MAKE_PLOTS_AGAINST_VMS:
 
         file1 = f'{metrics_folder}/{metrics_vs_interval_file_number}.log'
-        interval_metrics = parse_metrics(file1)
+        interval_metrics, interval_proc_metrics = parse_metrics(file1)
 
         # Plot each metric against interval
         for k, v in interval_metrics.items():
@@ -80,7 +118,29 @@ if __name__ == "__main__":
             plt.title(title)
             plt.grid(True)
             plt.legend()
-            plt.savefig(f"{plots_folder}/{title}.png")
+            savefig(f"{plots_folder}/{title}.png")
+            plt.close()
+
+        # Plot each proc metric against interval
+        for k, v in interval_proc_metrics.items():
+            if k == vm_proc_pids_key:
+                continue
+
+            plt.ioff()
+            for pid, v2 in v.items():
+                plt.plot(
+                    interval_metrics[interval_numbers_key],
+                    v2,
+                    marker='o',
+                    label=interval_proc_metrics[vm_proc_pids_key].index(pid)+1
+                )
+            plt.xlabel(interval_numbers_key)
+            plt.ylabel(k)
+            title = f'proc-{k}-vs-{interval_numbers_key}'
+            plt.title(title)
+            plt.grid(True)
+            plt.legend()
+            savefig(f"{plots_folder}/{title}.png")
             plt.close()
 
     else:
@@ -91,7 +151,7 @@ if __name__ == "__main__":
 
         for vm in vms :
             file = f'{metrics_folder}/{vm}.log'
-            interval_metrics = parse_metrics(file)
+            interval_metrics, interval_proc_metrics = parse_metrics(file)
             for k, v in interval_metrics.items():
                 if k == interval_numbers_key:
                     continue
@@ -109,7 +169,7 @@ if __name__ == "__main__":
             title = f'{k}-vs-vms'
             plt.title(title)
             plt.grid(True)
-            plt.savefig(f"{plots_folder}/{title}.png")
+            savefig(f"{plots_folder}/{title}.png")
             plt.close()
 
         reclaimed = np.array(last_interval_metrics["pages_sharing"])*4/1024
@@ -127,9 +187,9 @@ if __name__ == "__main__":
         plt.title(title)
         plt.grid(True)
         plt.legend()
-        plt.savefig(f"{plots_folder}/{title}.png")
+        savefig(f"{plots_folder}/{title}.png")
         plt.close()
-        
+
         shared = shared*100/total_mem
         reclaimed = reclaimed*100/total_mem
         diff = shared - reclaimed
@@ -143,6 +203,6 @@ if __name__ == "__main__":
         #plt.title(title)
         plt.grid(True)
         plt.legend()
-        plt.savefig(f"{plots_folder}/{title}.png")
+        savefig(f"{plots_folder}/{title}.png")
         plt.close()
-        
+
