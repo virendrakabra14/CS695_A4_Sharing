@@ -76,6 +76,8 @@ Inside virt-manager, we specify the disk to be used lazily (this is not a necess
 
 Please name this virtual machine as `vm1_debian12`. This is hard-coded within our VM management script. Subsequent clones will be auto-named as `vm<i>_debian12`.
 
+During OS installation, we choose the (non-graphical) `Install` option from menu and opt only for `ssh` and basic utilities to be installed.
+
 ## Workloads
 
 **NOTE**: follow these BEFORE any cloning (i.e., before running any VM experiments), so that this is already done in clones.
